@@ -1,23 +1,24 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './Components/Dashboard';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Profile from './Components/Pages/Profile';
-import NewTicket from './Components/Pages/NewTicket';
-import Footer from './Components/Footer';
+import Layout from './Layout';
+import Login from './Components/Auth/Login';
+import Signup from './Components/Auth/Signup';
 import TicketAssess from './Components/Pages/TicketAssess';
+import NewTicket from './Components/Pages/NewTicket';
 
 function App() {
   return (
     <Router>
-      <div>
-        <Switch>
-          <Route path="/profile" component={Profile} />
-          <Route path="/NewTicket" component={NewTicket} />
-          <Route path="/TicketAssess" component={TicketAssess} />
-          {/* Add more routes as needed */}
-          <Route path="/" component={Dashboard} />
-        </Switch>
-      </div>
+      <Routes path="/" element={<Layout />}>
+        <Route index element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/Profile" element={<Profile />} />
+        <Route path="/TicketAssess" element={<TicketAssess />} />
+        <Route path="/NewTicket" element={<NewTicket />} />
+      </Routes>
     </Router>
   );
 }

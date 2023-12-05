@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import AppNavbar from '../Navbar';
+import { auth } from '../../firebase';
 
 const NewTicket = () => {
   const initialFormData = {
@@ -16,16 +17,50 @@ const NewTicket = () => {
     priority: '',
     title: '',
     description: '',
-    assignTo: '',
+    assignTo: '', // Set default value to 'NoPerson'
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [user, setUser] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      setUser(authUser);
+
+      if (!authUser) {
+        // If no user is logged in, redirect to signup
+        navigate('/signup');
+      }
+    });
+
+    // Fetch all users from Firebase
+    const fetchAllUsers = async () => {
+      try {
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const usersData = usersSnapshot.docs.map(doc => doc.data());
+        setAllUsers(usersData);
+      } catch (error) {
+        console.error('Error fetching users: ', error);
+      }
+    };
+
+    fetchAllUsers();
+
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate]);
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const docRef = await addDoc(collection(db, 'tickets'), formData);
+      const docRef = await addDoc(collection(db, 'tickets'), {
+        ...formData,
+        createdBy: user.email, // Add the email of the logged-in user
+      });
 
       console.log('Document written with ID: ', docRef.id);
 
@@ -44,6 +79,11 @@ const NewTicket = () => {
     setFormData(initialFormData); // Reset the form data to initial values
   };
 
+  if (!user) {
+    // This block should not be reached because the redirect happens in the useEffect
+    return null;
+  }
+
   return (
     <div>
       <AppNavbar />
@@ -53,7 +93,7 @@ const NewTicket = () => {
             <Card.Header>
               <Nav variant="pills" defaultActiveKey="#first">
                 <Nav.Item>
-                  <Link to="/" className="nav-link">
+                  <Link to="/Dashboard" className="nav-link">
                     <Button variant="primary">Go back</Button>
                   </Link>
                 </Nav.Item>
@@ -120,9 +160,11 @@ const NewTicket = () => {
                       aria-label="Default select example"
                     >
                       <option value="">Assign to:</option>
-                      <option value="User 1">User 1</option>
-                      <option value="User 2">User 2</option>
-                      <option value="User 3">User 3</option>
+                      {allUsers.map((user) => (
+                        <option key={user.id} value={user.name}>
+                          {user.name}
+                        </option>
+                      ))}
                     </Form.Select>
                   </div>
                   <>

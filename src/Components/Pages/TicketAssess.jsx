@@ -1,7 +1,7 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
 
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
@@ -10,34 +10,56 @@ import AppNavbar from '../Navbar';
 import { Button } from 'react-bootstrap';
 
 const TicketAssess = () => {
-    const { ticketId } = useParams();
-    const [ticket, setTicket] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
+  const { ticketId } = useParams();
+  const [ticket, setTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-    React.useEffect(() => {
-        const fetchTicket = async () => {
-            try {
-                const docRef = doc(db, 'tickets', ticketId);
-                const docSnap = await getDoc(docRef);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      setUser(authUser);
 
-                if (docSnap.exists()) {
-                    setTicket(docSnap.data());
-                } else {
-                    console.error('No such document!');
-                }
-            } catch (error) {
-                console.error('Error getting document:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+      if (!authUser) {
+        // If no user is logged in, redirect to signup
+        navigate('/signup');
+      }
+    });
 
-        fetchTicket();
-    }, [ticketId]);
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate]);
 
-    return (
-        <div>
-        <AppNavbar />
+  useEffect(() => {
+    const fetchTicket = async () => {
+      try {
+        const docRef = doc(db, 'tickets', ticketId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setTicket(docSnap.data());
+        } else {
+          console.error('No such document!');
+        }
+      } catch (error) {
+        console.error('Error getting document:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTicket();
+  }, [ticketId]);
+
+  if (!user) {
+    // If there's no logged-in user, the redirect to signup would have already happened
+    return null;
+  }
+
+  return (
+    <div>
+      <AppNavbar />
         <Container className="mt-4 d-flex justify-content-center">
           <div className="cards">
             {!loading && !ticket && (
@@ -59,7 +81,7 @@ const TicketAssess = () => {
 
                     </textarea>
                     <br/>
-                <Button variant="primary">Edit Ticket</Button>{' '}
+                <Button variant="primary">Edit Tcket</Button>{' '}
                 <Button variant="success">Close Ticket</Button>{' '}
                 </form>
 

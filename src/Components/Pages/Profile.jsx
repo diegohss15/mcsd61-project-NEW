@@ -1,8 +1,32 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../Navbar';
+import { auth } from '../../firebase';
 
 const Profile = () => {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      setUser(authUser);
+
+      if (!authUser) {
+        // If no user is logged in, redirect to signup
+        navigate('/signup');
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [navigate]);
+
+  if (!user) {
+    // This block should not be reached because the redirect happens in the useEffect
+    return null;
+  }
+
   return (
     <div>
       <AppNavbar />
@@ -25,8 +49,8 @@ const Profile = () => {
                     </Link>
                   </div>
                   <div className="ms-3" style={{ marginTop: '130px' }}>
-                    <h5>Mary Jane</h5>
-                    <p>New York</p>
+                    <h5>Name: Mary Jane</h5>
+                    <p>New York</p> 
                   </div>
                 </div>
                 <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
@@ -51,7 +75,7 @@ const Profile = () => {
                     <p className="font-italic mb-1">Lives in New York</p>
                     <p className="font-italic mb-0">Photographer</p>
                   </ProfileSection>
-                  <ProfileSection title="Personality">
+                  <ProfileSection title="Bio">
                     <p className="font-italic mb-1">
                       When I'm not immersed in the tech world, you'll find me hiking in the great outdoors, exploring new
                       cuisines, and mentoring aspiring tech professionals. I believe in a work-life balance that fuels
