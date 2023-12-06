@@ -14,7 +14,7 @@ const Login = () => {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            navigate("/Dashboard"); // Redirect to the Dashboard on successful login
+            navigate("/Dashboard"); 
         } catch {
             setNotice("Invalid email or password. Please try again.");
         }

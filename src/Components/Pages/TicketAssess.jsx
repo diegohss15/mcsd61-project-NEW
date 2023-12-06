@@ -21,7 +21,6 @@ const TicketAssess = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // If no user is logged in, redirect to signup
         navigate('/signup');
       }
     });
@@ -53,7 +52,6 @@ const TicketAssess = () => {
   }, [ticketId]);
 
   if (!user) {
-    // If there's no logged-in user, the redirect to signup would have already happened
     return null;
   }
 

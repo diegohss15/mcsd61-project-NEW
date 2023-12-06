@@ -33,7 +33,7 @@ const Signup = () => {
                         <div className="alert alert-warning" role="alert">
                             { notice }    
                         </div>
-                    )}  {/* Closing parenthesis added here */}
+                    )}
                     <div className="form-floating mb-3">
                         <input id="signupEmail" type="email" className="form-control" aria-describedby="emailHelp" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)}></input>
                         <label htmlFor="signupEmail" className="form-label">Enter an email address for your username</label>

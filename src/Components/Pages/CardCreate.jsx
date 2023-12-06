@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tabs, Tab, Button } from 'react-bootstrap';
+import { Table, Tabs, Tab, Button, Modal } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
@@ -7,6 +7,8 @@ import { db, auth } from '../../firebase';
 const CardCreate = () => {
   const [tasks, setTasks] = useState([]);
   const [pageNumber, setPageNumber] = useState(0);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const tasksPerPage = 10;
 
   useEffect(() => {
@@ -37,6 +39,7 @@ const CardCreate = () => {
       await updateDoc(taskRef, {
         assignedTo: auth.currentUser ? auth.currentUser.email : '',
       });
+
       // Fetch tasks again to update the state
       const querySnapshot = await getDocs(collection(db, 'tickets'));
       const updatedTaskData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -46,9 +49,17 @@ const CardCreate = () => {
     }
   };
 
-  // Filter tasks assigned to the current user
+  const handleViewDetails = (taskId) => {
+    const task = tasks.find(task => task.id === taskId);
+    setSelectedTask(task);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   const userAssignedTasks = tasks.filter(task => task.assignedTo === auth.currentUser?.email);
-  // Filter tasks that are new or assigned to no one
   const newTasks = tasks.filter(task => !task.assignedTo || task.assignedTo === '');
 
   return (
@@ -67,6 +78,7 @@ const CardCreate = () => {
                 <th>Assigned to: </th>
                 <th>Status:</th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -80,6 +92,7 @@ const CardCreate = () => {
                   <td>{task.assignedTo}</td>
                   <td>{task.status}</td>
                   <td><Button onClick={() => handleTakeover(task.id)}>Takeover</Button></td>
+                  <td><Button onClick={() => handleViewDetails(task.id)}>View</Button></td>
                 </tr>
               ))}
             </tbody>
@@ -87,15 +100,14 @@ const CardCreate = () => {
           <ReactPaginate
             previousLabel={<Button variant="outline-secondary" className="btn-pagination">Previous</Button>}
             nextLabel={<Button variant="outline-secondary" className="btn-pagination">Next</Button>}
-            pageCount={Math.ceil(newTasks.length / tasksPerPage)}
+            pageCount={pageCount}
             onPageChange={changePage}
-            containerClassName={'pagination justify-content-center'} // Center the pagination
+            containerClassName={'pagination justify-content-center'}
             previousLinkClassName={'page-link'}
             nextLinkClassName={'page-link'}
             disabledClassName={'disabled'}
             activeClassName={'active'}
           />
-
         </Tab>
         <Tab eventKey="assigned" title="Assigned to me">
           <Table striped bordered hover size="sm" style={{ width: '90% !important' }}>
@@ -140,10 +152,32 @@ const CardCreate = () => {
         </Tab>
         <Tab eventKey="all" title="All tickets">
           <Table striped bordered hover size="sm">
-            {/* ... (No changes here) */}
           </Table>
         </Tab>
       </Tabs>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Task Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedTask && (
+            <div>
+              <p>Title: {selectedTask.title}</p>
+              <p>Category: {selectedTask.category}</p>
+              <p>Priority: {selectedTask.priority}</p>
+              <p>Created by: {selectedTask.createdBy}</p>
+              <p>Description: {selectedTask.description}</p>
+              <p>Status: {selectedTask.status}</p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -23,7 +23,7 @@ const Profile = () => {
   }, [navigate]);
 
   if (!user) {
-    // This block should not be reached because the redirect happens in the useEffect
+    // Testblock (Should not come to here)
     return null;
   }
 

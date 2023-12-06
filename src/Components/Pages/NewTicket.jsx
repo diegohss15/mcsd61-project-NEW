@@ -17,7 +17,7 @@ const NewTicket = () => {
     priority: '',
     title: '',
     description: '',
-    assignTo: '', // Set default value to 'NoPerson'
+    assignTo: '', // By default, assigned to 'No one' as empty string
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -30,12 +30,11 @@ const NewTicket = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // If no user is logged in, redirect to signup
+        // IF no user is logged in, redirect to signup
         navigate('/signup');
       }
     });
 
-    // Fetch all users from Firebase
     const fetchAllUsers = async () => {
       try {
         const usersSnapshot = await getDocs(collection(db, 'users'));
@@ -59,12 +58,12 @@ const NewTicket = () => {
     try {
       const docRef = await addDoc(collection(db, 'tickets'), {
         ...formData,
-        createdBy: user.email, // Add the email of the logged-in user
+        createdBy: user.email,
       });
 
       console.log('Document written with ID: ', docRef.id);
 
-      setFormData(initialFormData); // Reset the form data to initial values
+      setFormData(initialFormData);
     } catch (error) {
       console.error('Error adding document: ', error);
     }
@@ -76,11 +75,11 @@ const NewTicket = () => {
   };
 
   const handleCancelClick = () => {
-    setFormData(initialFormData); // Reset the form data to initial values
+    setFormData(initialFormData);
   };
 
   if (!user) {
-    // This block should not be reached because the redirect happens in the useEffect
+    // Testblock (Should not come to here)
     return null;
   }
 

@@ -16,7 +16,7 @@ const Dashboard = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // If no user is logged in, redirect to signup
+        // IF no user is logged, redirect to signup
         navigate('/signup');
       }
     });
@@ -36,7 +36,7 @@ const Dashboard = () => {
   };
 
   if (!user) {
-    // This block should not be reached because the redirect happens in the useEffect
+    // Testblock (Should not come to here)
     return null;
   }
 
