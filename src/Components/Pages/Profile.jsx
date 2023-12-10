@@ -12,8 +12,8 @@ const Profile = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // If no user is logged in, redirect to signup
-        navigate('/signup');
+        // If no user is logged in, redirect to login
+        navigate('/');
       }
     });
 

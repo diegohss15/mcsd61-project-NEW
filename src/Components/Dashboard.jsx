@@ -16,8 +16,8 @@ const Dashboard = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // IF no user is logged, redirect to signup
-        navigate('/signup');
+        // IF no user is logged, redirect to login
+        navigate('/');
       }
     });
 
