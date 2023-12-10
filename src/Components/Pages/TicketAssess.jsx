@@ -21,7 +21,7 @@ const TicketAssess = () => {
       setUser(authUser);
 
       if (!authUser) {
-        navigate('/signup');
+        navigate('/');
       }
     });
 

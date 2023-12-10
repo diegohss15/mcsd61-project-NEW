@@ -1,21 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../Navbar';
-import { auth } from '../../firebase';
+import { auth, db } from '../../firebase';
+import { getDocs, collection } from 'firebase/firestore';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
+  const [authId, setAuthId] = useState(null);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       setUser(authUser);
+      setAuthId(authUser.uid);
 
       if (!authUser) {
-        // If no user is logged in, redirect to signup
-        navigate('/signup');
+        // If no user is logged in, redirect to login
+        navigate('/');
       }
+      fetchUserData();
     });
+
+    const fetchUserData = async () => {
+      try {
+        const queryUsers = await getDocs(collection(db, 'users'));
+        queryUsers.forEach((doc) => {
+          var u = doc.data();
+          if (u.authId === authId){
+            setUserData(u);
+          }
+        });
+      } catch (error) {
+        alert(error);
+        console.error(error);
+      }
+    };
 
     return () => {
       unsubscribe();
@@ -48,60 +68,36 @@ const Profile = () => {
                       Edit profile
                     </Link>
                   </div>
-                  <div className="ms-3" style={{ marginTop: '130px' }}>
-                    <h5>Name: Mary Jane</h5>
-                    <p>New York</p> 
+                  <div className="container py-5" style={{ marginTop: '30px' }}>
+                    {userData ? (
+                      <div>
+                        <h2>Name: {userData.name}</h2>
+                        <p></p>
+                        <h6>location: {userData.location}</h6>
+                        <h6>role: {userData.role} </h6>
+                      </div> 
+                    ) : (
+                      <p>Loading user data...</p>
+                    )}
                   </div>
+                  
                 </div>
                 <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
                   <div className="d-flex justify-content-end text-center py-1">
-                    <div>
-                      <p className="mb-1 h5">253</p>
-                      <p className="small text-muted mb-0">Photos</p>
-                    </div>
-                    <div className="px-3">
-                      <p className="mb-1 h5">1026</p>
-                      <p className="small text-muted mb-0">Followers</p>
-                    </div>
-                    <div>
-                      <p className="mb-1 h5">478</p>
-                      <p className="small text-muted mb-0">Following</p>
-                    </div>
                   </div>
                 </div>
                 <div className="card-body p-4 text-black">
-                  <ProfileSection title="Skills">
-                    <p className="font-italic mb-1">Web Developer</p>
-                    <p className="font-italic mb-1">Lives in New York</p>
-                    <p className="font-italic mb-0">Photographer</p>
-                  </ProfileSection>
                   <ProfileSection title="Bio">
-                    <p className="font-italic mb-1">
-                      When I'm not immersed in the tech world, you'll find me hiking in the great outdoors, exploring new
-                      cuisines, and mentoring aspiring tech professionals. I believe in a work-life balance that fuels
-                      creativity and personal growth.
-                    </p>
+                    {userData ? (
+                      <div>
+                        <p className="font-italic mb-1">
+                          {userData.bio}
+                        </p>
+                      </div> 
+                    ) : (
+                      <p>Loading user data...</p>
+                    )}
                   </ProfileSection>
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <p className="lead fw-normal mb-0">Recent photos</p>
-                    <p className="mb-0">
-                      <a href="#!" className="text-muted">
-                        Show all
-                      </a>
-                    </p>
-                  </div>
-                  <div className="row g-2">
-                    {renderPhotos([
-                      'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp',
-                      'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp',
-                    ])}
-                  </div>
-                  <div className="row g-2">
-                    {renderPhotos([
-                      'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp',
-                      'https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp',
-                    ])}
-                  </div>
                 </div>
               </div>
             </div>

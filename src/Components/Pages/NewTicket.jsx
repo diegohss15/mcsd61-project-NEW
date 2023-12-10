@@ -30,8 +30,8 @@ const NewTicket = () => {
       setUser(authUser);
 
       if (!authUser) {
-        // IF no user is logged in, redirect to signup
-        navigate('/signup');
+        // IF no user is logged in, redirect to login
+        navigate('/');
       }
     });
 
