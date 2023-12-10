@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './Components/Dashboard';
 import Profile from './Components/Pages/Profile';
+import EditProfile from './Components/Pages/EditProfile';
 import Layout from './Layout';
 import Login from './Components/Auth/Login';
 import Signup from './Components/Auth/Signup';
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/EditProfile" element={<EditProfile />} />
         <Route path="/TicketAssess" element={<TicketAssess />} />
         <Route path="/NewTicket" element={<NewTicket />} />
       </Routes>

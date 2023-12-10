@@ -3,26 +3,45 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import AppNavbar from './Navbar';
 import CardCreate from './Pages/CardCreate';
-import { auth } from '../firebase';
+import { auth, db }  from '../firebase';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
+import { getDocs, collection } from 'firebase/firestore';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      setUser(authUser);
-
+    const fetchData = auth.onAuthStateChanged((authUser) => {
       if (!authUser) {
-        // IF no user is logged, redirect to login
+        // If no user is logged in, redirect to login
         navigate('/');
       }
+
+      fetchUserData(authUser.uid);
     });
 
+    const fetchUserData = async (authId) => {
+      try {
+        const documents = await getDocs(collection(db, 'users'));
+        documents.forEach((document) => {
+          const data = document.data();
+          console.log('EQUALS ',data.authId === authId, data.authId, authId);
+
+          if (data.authId === authId){
+            console.log('data', data);
+            setUserData(data);
+          }
+        });
+      } catch (error) {
+        alert(error);
+        console.error(error);
+      }
+    };
+
     return () => {
-      unsubscribe();
+      fetchData();
     };
   }, [navigate]);
 
@@ -35,17 +54,9 @@ const Dashboard = () => {
     }
   };
 
-  if (!user) {
-    // Testblock (Should not come to here)
-    return null;
-  }
-
-  const userName = user.displayName || 'John Doe';
-  const userEmail = user.email || 'john@example.com';
-
   return (
     <div>
-      <AppNavbar userName={userName} />
+      <AppNavbar userName={userData?.name} />
       <Container className="mt-4">
         <Row>
           <Col md="auto">
@@ -60,8 +71,8 @@ const Dashboard = () => {
               <Card.Body>
                 <Card.Title>Card 2</Card.Title>
                 <Card.Text>
-                  <p>Hello, {userName}!</p>
-                  <p>Your email: {userEmail}</p>
+                  <p>Hello, {userData?.name}!</p>
+                  <p>Your email: {userData?.email}</p>
                   <p>Welcome to your dashboard!</p>
 
                 </Card.Text>

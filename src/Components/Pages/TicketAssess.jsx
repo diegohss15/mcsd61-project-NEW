@@ -79,7 +79,7 @@ const TicketAssess = () => {
 
                     </textarea>
                     <br/>
-                <Button variant="primary">Edit Tcket</Button>{' '}
+                <Button variant="primary">Edit Ticket</Button>{' '}
                 <Button variant="success">Close Ticket</Button>{' '}
                 </form>
 
