@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
+import { collection, addDoc } from 'firebase/firestore';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -9,14 +10,29 @@ const Signup = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [notice, setNotice] = useState("");
+    const [name, setName] = useState("");
+    const [location, setLocation] = useState('');
+    const [bio, setBio] = useState('');
+    const [role, setRole] = useState('');
 
     const signupWithUsernameAndPassword = async (e) => {
         e.preventDefault();
 
+        var userData = {
+            name: name,
+            bio: bio,
+            email: email,
+            location: location,
+            role: role,
+            authId: "",
+        }
+
         if (password === confirmPassword) {
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                navigate("/");
+                var authentication = await createUserWithEmailAndPassword(auth, email, password);
+                userData.authId = authentication.user.uid;
+                await addDoc(collection(db, 'users'), userData);
+                navigate("/Dashboard");
             } catch {
                 setNotice("Sorry, something went wrong. Please try again.");
             }     
@@ -34,6 +50,23 @@ const Signup = () => {
                             { notice }    
                         </div>
                     )}
+                    <div className="form-floating mb-3">
+                        <input id="signupName" type="text" className="form-control" aria-describedby="nameHelp" placeholder="" value={name} onChange={(e) => setName(e.target.value)}></input>
+                        <label htmlFor="signupName" className="form-label">Name</label>
+                    </div>
+                    <div className="form-floating mb-3">
+                        <input id="signupLocation" type="text" className="form-control" aria-describedby="locationHelp" placeholder="" value={location} onChange={(e) => setLocation(e.target.value)}></input>
+                        <label htmlFor="signupLocation" className="form-label">Location</label>
+                    </div>
+                    <div className="form-floating mb-3">
+                        <input id="signupRole" type="text" className="form-control" aria-describedby="roleHelp" placeholder="" value={role} onChange={(e) => setRole(e.target.value)}></input>
+                        <label htmlFor="signupRole" className="form-label">Role</label>
+                    </div>
+                    <div className="form-floating mb-3">
+                        <input id="signupBio" type="text" className="form-control" aria-describedby="bioHelp" placeholder="" value={bio} onChange={(e) => setBio(e.target.value)}></input>
+                        <label htmlFor="signupBio" className="form-label">Bio</label>
+                    </div>
+
                     <div className="form-floating mb-3">
                         <input id="signupEmail" type="email" className="form-control" aria-describedby="emailHelp" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)}></input>
                         <label htmlFor="signupEmail" className="form-label">Enter an email address for your username</label>
