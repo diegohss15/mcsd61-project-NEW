@@ -5,30 +5,26 @@ import { auth, db } from '../../firebase';
 import { getDocs, collection } from 'firebase/firestore';
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
-  const [authId, setAuthId] = useState(null);
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      setUser(authUser);
-      setAuthId(authUser.uid);
-
+    const fetchData = auth.onAuthStateChanged((authUser) => {
       if (!authUser) {
         // If no user is logged in, redirect to login
         navigate('/');
       }
-      fetchUserData();
+
+      fetchUserData(authUser.uid);
     });
 
-    const fetchUserData = async () => {
+    const fetchUserData = async (authId) => {
       try {
-        const queryUsers = await getDocs(collection(db, 'users'));
-        queryUsers.forEach((doc) => {
-          var u = doc.data();
-          if (u.authId === authId){
-            setUserData(u);
+        const documents = await getDocs(collection(db, 'users'));
+        documents.forEach((document) => {
+          const data = document.data();
+          if (data.authId === authId){
+            setUserData(data);
           }
         });
       } catch (error) {
@@ -38,14 +34,9 @@ const Profile = () => {
     };
 
     return () => {
-      unsubscribe();
+      fetchData();
     };
   }, [navigate]);
-
-  if (!user) {
-    // Testblock (Should not come to here)
-    return null;
-  }
 
   return (
     <div>
@@ -64,7 +55,7 @@ const Profile = () => {
                       className="img-fluid img-thumbnail mt-4 mb-2"
                       style={{ width: '150px', zIndex: 1 }}
                     />
-                    <Link to="/editProfile" className="btn btn-outline-dark" style={{ zIndex: 1 }}>
+                    <Link to="/EditProfile" className="btn btn-outline-dark" style={{ zIndex: 1 }}>
                       Edit profile
                     </Link>
                   </div>
